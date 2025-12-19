@@ -1,12 +1,9 @@
 package com.soa.ejbvehicle.config;
 
-import javax.annotation.PostConstruct;
 import javax.annotation.sql.DataSourceDefinition;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import javax.sql.DataSource;
+
 
 @Singleton
 @Startup
