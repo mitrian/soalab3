@@ -2,3 +2,4 @@ rootProject.name = 'spring-module'
 
 include 'shop-service'
 include 'eureka-server'
+include 'config-server'
