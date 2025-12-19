@@ -1,7 +1,4 @@
-version: "3.9"
-
 services:
-  # PostgreSQL база данных
   postgres:
     image: postgres:15-alpine
     container_name: postgres-vehicle
@@ -22,7 +19,6 @@ services:
       timeout: 5s
       retries: 5
 
-  # Сервер с EJB
   payara-ejb:
     image: payara/server-full:5.2022.5-jdk11
     container_name: payara-ejb
@@ -44,8 +40,6 @@ services:
       - POSTGRES_DB=vehicle_db
       - POSTGRES_USER=vehicle_user
       - POSTGRES_PASSWORD=vehicle_password
-
-  # Сервер с Web клиентом
   payara-web:
     image: payara/server-full:5.2022.5-jdk11
     container_name: payara-web
@@ -55,10 +49,32 @@ services:
       - "4850:4848"
     depends_on:
       - payara-ejb
+      - consul
     volumes:
       - ./web-vehicle/build/libs:/opt/payara/deployments
     networks:
       - ejb-net
+    environment:
+      - CONSUL_HOST=consul
+      - CONSUL_PORT=8500
+      - SERVICE_NAME=web-vehicle
+      - SERVICE_ADDRESS=payara-web
+      - SERVICE_PORT=8080
+
+  consul:
+    image: consul:1.15.4
+    container_name: consul
+    restart: unless-stopped
+    ports:
+      - "8500:8500"
+    networks:
+      - ejb-net
+    command: consul agent -dev -client=0.0.0.0 -ui
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8500/v1/status/leader || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 networks:
   ejb-net:
