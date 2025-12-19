@@ -1,6 +1,27 @@
 version: "3.9"
 
 services:
+  # PostgreSQL база данных
+  postgres:
+    image: postgres:15-alpine
+    container_name: postgres-vehicle
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: vehicle_db
+      POSTGRES_USER: vehicle_user
+      POSTGRES_PASSWORD: vehicle_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - ejb-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vehicle_user -d vehicle_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   # Сервер с EJB
   payara-ejb:
     image: payara/server-full:5.2022.5-jdk11
@@ -9,11 +30,20 @@ services:
     ports:
       - "8081:8080"
       - "4849:4848"
+    depends_on:
+      postgres:
+        condition: service_healthy
     volumes:
-      - ./deployments/ejb:/opt/payara/deployments
+      - ./ejb-vehicle/build/libs:/opt/payara/deployments
       - ./deployments/ejb/post-boot.asadmin:/opt/payara/config/post-boot-commands.asadmin
     networks:
       - ejb-net
+    environment:
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=vehicle_db
+      - POSTGRES_USER=vehicle_user
+      - POSTGRES_PASSWORD=vehicle_password
 
   # Сервер с Web клиентом
   payara-web:
@@ -26,10 +56,13 @@ services:
     depends_on:
       - payara-ejb
     volumes:
-      - ./deployments/web:/opt/payara/deployments
+      - ./web-vehicle/build/libs:/opt/payara/deployments
     networks:
       - ejb-net
 
 networks:
   ejb-net:
     driver: bridge
+
+volumes:
+  postgres_data:

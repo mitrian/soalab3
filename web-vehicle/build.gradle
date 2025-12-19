@@ -31,6 +31,15 @@ dependencies {
         exclude group: 'org.glassfish.jersey.inject', module: 'jersey-hk2'
         exclude group: 'org.glassfish.jersey.media', module: 'jersey-media-json-binding'
     }
+    
+    // Jackson for XML
+    implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-xml:2.13.5'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.5'
+    implementation 'com.fasterxml.jackson.jaxrs:jackson-jaxrs-xml-provider:2.13.5'
+    
+    // Bean Validation
+    implementation 'org.hibernate.validator:hibernate-validator:6.2.0.Final'
+    implementation 'org.glassfish:javax.el:3.0.0'
 }
 
 war {
