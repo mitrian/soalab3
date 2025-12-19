@@ -12,7 +12,8 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
-      - ejb-net
+      ejb-net:
+        ipv4_address: 172.30.0.5
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U vehicle_user -d vehicle_db"]
       interval: 10s
@@ -40,6 +41,8 @@ services:
       - POSTGRES_DB=vehicle_db
       - POSTGRES_USER=vehicle_user
       - POSTGRES_PASSWORD=vehicle_password
+    extra_hosts:
+      - "postgres:172.30.0.5"
   payara-web:
     image: payara/server-full:5.2022.5-jdk11
     container_name: payara-web
@@ -65,20 +68,88 @@ services:
     image: consul:1.15.4
     container_name: consul
     restart: unless-stopped
+    command: agent -dev -client=0.0.0.0 -dns-port=53
     ports:
       - "8500:8500"
     networks:
-      - ejb-net
-    command: consul agent -dev -client=0.0.0.0 -ui
+      ejb-net:
+        ipv4_address: 172.30.0.10
     healthcheck:
       test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8500/v1/status/leader || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 5
 
+  eureka-server:
+    build:
+      context: ./spring-module
+      dockerfile: eureka-server/Dockerfile
+    container_name: eureka-server
+    restart: unless-stopped
+    ports:
+      - "8761:8761"
+    networks:
+      - ejb-net
+    environment:
+      - EUREKA_INSTANCE_HOSTNAME=eureka-server
+
+  config-server:
+    build:
+      context: ./spring-module
+      dockerfile: config-server/Dockerfile
+    container_name: config-server
+    restart: unless-stopped
+    ports:
+      - "8888:8888"
+    depends_on:
+      - eureka-server
+    networks:
+      - ejb-net
+    volumes:
+      - ./spring-module/config-server/config-repo:/app/config-repo
+
+  shop-service:
+    build:
+      context: ./spring-module
+      dockerfile: shop-service/Dockerfile
+    container_name: shop-service
+    restart: unless-stopped
+    ports:
+      - "8084:8084"
+    depends_on:
+      - config-server
+      - eureka-server
+    networks:
+      - ejb-net
+    environment:
+      - SPRING_CLOUD_CONFIG_URI=http://config-server:8888
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://eureka-server:8761/eureka/
+
+  api-gateway:
+    build:
+      context: ./spring-module
+      dockerfile: api-gateway/Dockerfile
+    container_name: api-gateway
+    restart: unless-stopped
+    ports:
+      - "8088:8080"
+    depends_on:
+      - consul
+      - eureka-server
+    networks:
+      ejb-net:
+        ipv4_address: 172.30.0.11
+    dns:
+      - 172.30.0.10
+    environment:
+      - EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://eureka-server:8761/eureka/
+
 networks:
   ejb-net:
     driver: bridge
+    ipam:
+      config:
+        - subnet: 172.30.0.0/16
 
 volumes:
   postgres_data:

@@ -1,2 +1,5 @@
 set-ejb-invoker-configuration --enabled=true
 
+create-jdbc-connection-pool --datasourceclassname org.postgresql.xa.PGXADataSource --restype javax.sql.XADataSource --property user=vehicle_user:password=vehicle_password:serverName=postgres:portNumber=5432:databaseName=vehicle_db:serverName=postgres vehicle-pool
+
+create-jdbc-resource --connectionpoolid vehicle-pool jdbc/__default
