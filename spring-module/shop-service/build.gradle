@@ -3,4 +3,10 @@ description = 'shop-service'
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+    // Config Client для получения конфигурации из Config Server
+    implementation 'org.springframework.cloud:spring-cloud-starter-config'
+    // Bootstrap для загрузки конфигурации до application.properties
+    implementation 'org.springframework.cloud:spring-cloud-starter-bootstrap'
+    // Actuator для refresh endpoint (обновление конфигурации без перезапуска)
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
 }
