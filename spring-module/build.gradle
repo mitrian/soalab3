@@ -22,15 +22,12 @@ repositories {
     mavenCentral()
 }
 
-// Dependency Management для корневого проекта
 dependencyManagement {
     imports {
         mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
     }
-    // Spring Boot BOM уже включен в Spring Cloud BOM, но можно явно указать для совместимости
 }
 
-// Общие настройки для всех подпроектов
 subprojects {
     apply plugin: 'java'
     apply plugin: 'org.springframework.boot'
@@ -65,7 +62,6 @@ subprojects {
     }
 }
 
-// Настройки для корневого проекта spring-module
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'

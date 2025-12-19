@@ -12,9 +12,9 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.HashMap;
 import java.util.Map;
 
-@RefreshScope  // Позволяет обновлять конфигурацию через /actuator/refresh
+@RefreshScope
 @RestController
-@RequestMapping("/")
+@RequestMapping("/api/v1")
 public class HelloController {
 
     private final WebVehicleClient webVehicleClient;
@@ -32,7 +32,6 @@ public class HelloController {
 
     @GetMapping("/hello")
     public ResponseEntity<String> hello() {
-//        return ResponseEntity.ok("Hello World");
         try {
             String response = webVehicleClient.callWebVehicle();
             return ResponseEntity.ok(response);
