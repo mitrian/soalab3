@@ -1,0 +1,13 @@
+description = 'api-gateway'
+
+dependencies {
+    // Spring Cloud Gateway (современная замена Zuul)
+    implementation 'org.springframework.cloud:spring-cloud-starter-gateway'
+    // Eureka Client для поиска сервисов через Service Discovery
+    implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+    // LoadBalancer для балансировки нагрузки (вместо Ribbon)
+    implementation 'org.springframework.cloud:spring-cloud-starter-loadbalancer'
+    // Actuator для мониторинга Gateway
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+}
+
