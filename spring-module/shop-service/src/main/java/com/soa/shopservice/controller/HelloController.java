@@ -14,7 +14,7 @@ import java.util.Map;
 
 @RefreshScope  // Позволяет обновлять конфигурацию через /actuator/refresh
 @RestController
-@RequestMapping("/api/v1")
+@RequestMapping("/")
 public class HelloController {
 
     private final WebVehicleClient webVehicleClient;
