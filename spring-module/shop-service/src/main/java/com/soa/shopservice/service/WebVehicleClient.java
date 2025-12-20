@@ -2,6 +2,7 @@ package com.soa.shopservice.service;
 
 import com.soa.shopservice.dto.VehicleListResponseDTO;
 import com.soa.shopservice.dto.VehicleResponseDTO;
+import com.soa.shopservice.exception.VehicleNotFoundException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -83,8 +84,7 @@ public class WebVehicleClient {
 
     public VehicleResponseDTO addWheels(Long vehicleId, int numberOfWheels) {
         String url = webVehicleUrl + "/api/v1/vehicles/" + vehicleId;
-        
-        // Получаем текущий vehicle
+
         ResponseEntity<VehicleResponseDTO> getResponse = restTemplate.exchange(
                 url,
                 HttpMethod.GET,
@@ -94,14 +94,12 @@ public class WebVehicleClient {
 
         VehicleResponseDTO vehicle = getResponse.getBody();
         if (vehicle == null) {
-            throw new RuntimeException("Vehicle not found with id " + vehicleId);
+            throw new VehicleNotFoundException("Vehicle not found with id " + vehicleId);
         }
 
-        // Вычисляем новое количество колес
         Long current = vehicle.getNumberOfWheels() == null ? 0L : vehicle.getNumberOfWheels();
         Long newNumberOfWheels = current + numberOfWheels;
 
-        // Создаем XML тело для PUT запроса в формате VehicleRequestDTO
         String xmlBody = """
                 <VehicleRequestDTO>
                     <name>%s</name>

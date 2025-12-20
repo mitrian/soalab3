@@ -21,3 +21,5 @@ Thumbs.db
 # Deployments (generated artifacts)
 deployments/ejb/*.jar
 deployments/web/*.war
+
+gateway/*
